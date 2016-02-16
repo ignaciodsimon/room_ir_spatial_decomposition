@@ -13,6 +13,9 @@ function listen_to_room(processed_data_filename)
     processed_audio = conv(loaded_data.reflectogram, input_audio);
     processed_audio = processed_audio / max(abs(processed_audio));
 
+    disp('Saving processed audio to file ...');
+    audiowrite('processed_audio.wav', processed_audio, sample_rate);
+
     disp('[Original audio]');
     p = audioplayer(input_audio, sample_rate);
     play(p)

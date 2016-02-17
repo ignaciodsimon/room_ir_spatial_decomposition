@@ -77,20 +77,39 @@ function corrected_signal = correct_air_absorption(input_signal, distance)
         return
     end
 
+
+% 
+%     % Filter input IR with the atmospheric attenuation, for the given distance
+%     filter_response = [interpolated_alpha(1,2)              % Consider the first entry also the value for DC
+%                        interpolated_alpha(:,2)              % First part of the spectrum
+%                        flipud(interpolated_alpha(1 : length(interpolated_alpha)-1, 2))];    % Mirrored part of the spectrum
+%     filter_response = 10.^(-filter_response * distance/1000 / 20);
+%     filter_ir = real(ifft(filter_response));
+% 
+%     % Correct the obtained IR to reduce the group delay to the minimum
+%     cut_point = round(0.997 * length(filter_ir));
+%     length_cut = round(0.01 * length(filter_ir));
+%     filter_ir = [filter_ir(cut_point : length(filter_ir))
+%                  filter_ir(1 : cut_point -1)];
+%     filter_ir = filter_ir(1:length_cut);
+
+
     % Filter input IR with the atmospheric attenuation, for the given distance
-    filter_response = [interpolated_alpha(1,2)              % Consider the first entry also the value for DC
-                       interpolated_alpha(:,2)              % First part of the spectrum
-                       flipud(interpolated_alpha(1 : length(interpolated_alpha)-1, 2))];    % Mirrored part of the spectrum
-    filter_response = 10.^(-filter_response * distance/1000 / 20);
+    filter_module = [interpolated_alpha(1,2)                                              % Consider the first entry also the value for DC
+                     interpolated_alpha(:,2)                                              % First part of the spectrum
+                     flipud(interpolated_alpha(1 : length(interpolated_alpha)-1, 2))];    % Mirrored part of the spectrum
+    filter_module = 10.^(-filter_module * distance/1000 / 20);
+
+    group_delay_samples = 40;
+
+    filter_phase = [1 : length(filter_module)/2]' / (length(filter_module)/2) * group_delay_samples * -pi;
+    filter_phase = [filter_phase
+                    filter_phase];
+
+    filter_response = filter_module .* (cos(filter_phase) + 1i*sin(filter_phase));
     filter_ir = real(ifft(filter_response));
-
-    % Correct the obtained IR to reduce the group delay to the minimum
-    cut_point = round(0.997 * length(filter_ir));
-    length_cut = round(0.01 * length(filter_ir));
-    filter_ir = [filter_ir(cut_point : length(filter_ir))
-                 filter_ir(1 : cut_point -1)];
-    filter_ir = filter_ir(1:length_cut);
-
+    filter_ir = filter_ir(1 : 200);
+    
     % Return the input data filtered
     corrected_signal = conv(input_signal, filter_ir);
     return

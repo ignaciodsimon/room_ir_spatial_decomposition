@@ -33,6 +33,6 @@ function test_air_correction()
     set(gcf, 'PaperPosition', [-0.42 +0.05 9.1 3.4]);
     set(gcf, 'PaperSize', [8.1 3.5]);
     saveas(gcf, 'air_correction_filters.pdf', 'pdf');
-    close(figureHandler);
+%     close(figureHandler);
 
 end

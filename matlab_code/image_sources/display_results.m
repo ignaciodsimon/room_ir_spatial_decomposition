@@ -14,9 +14,9 @@ function display_results(results_filename)
     source_position = loaded_data.source_position;
     room_boundaries = loaded_data.room_boundaries;
     image_sources_list = loaded_data.image_sources_list;
+    convolved_ir = loaded_data.convolved_ir;
 
     % Show plot with image sources and reflectogram
-    figure();
     time_axis = [0 : 1/sample_rate : (length(reflectogram)-1)/sample_rate];
     figure()
     subplot(2,1,1)
@@ -35,7 +35,10 @@ function display_results(results_filename)
     grid
     subplot(2,1,2)
     plot(time_axis, reflectogram);
-    title('Obtained reflectogram (using fractional delay)')
+    hold on
+    plot(time_axis, convolved_ir);
+    title('Obtained reflectogram / IR (using fractional delays)')
+    legend({'Reflectogram', 'Convolved IR'})
     ylabel('Amplitude [.]')
     xlabel('Time [s]')
     grid

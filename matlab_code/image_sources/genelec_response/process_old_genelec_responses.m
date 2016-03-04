@@ -33,11 +33,17 @@ function process_old_genelec_responses()
 
     subplot(2,1,1)
     plot(averaged_ir)
+    xlabel('Time [samples @ 48 kHz]')
+    ylabel('Amplitude [.]')
+    xlim([-10 1000])
     grid on
-    title('IR from Genelec loudspeaker')
+    title('IR from Genelec 1031A loudspeaker')
     subplot(2,1,2)
     module = abs(fft(averaged_ir, 48000));
-    semilogx(20*log10(module))
+    semilogx(20*log10(module) -7.44)
+    xlim([0 24000])
+    xlabel('Frequency [Hz]')
+    ylabel('Amplitude [dB rel. 1 kHz]')
     grid on
     title('Associated frequency response (module)')
 

@@ -14,7 +14,7 @@ function synthetic_room_geometry(display_geometry)
     animated_plot_pause_duration = 0.01;
 
     % Simulation limit
-    max_reflection_order = 50;
+    max_reflection_order = 10;
 
     % Collision precission
     boundary_collision_error_margin = 0.05;

@@ -34,6 +34,7 @@ function [image_sources_list, reflectogram] = mirror_images(room_definition_file
     % Joe.
 
     skip_after_succesful_ray = 0;
+    sources_minimum_distance = 0.2;
 
     addpath('air_absorption/');
 
@@ -99,7 +100,7 @@ tic
         current_track_bounces_count = 0;
 
         % Continue bouncing current ray until limit conditions are reached
-        disp(sprintf('\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b%+06.3f [deg] ...', ray_direction/pi*180));
+        disp(sprintf('\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b%+08.3f [deg] ...', ray_direction/pi*180));
         amount_of_collisions = 0;
         wall_collision = 0;
         last_touched_boundary = [];
@@ -154,7 +155,7 @@ tic
                 end
                 
             end
-
+            
             % Plot the new segment: from ray_origin -> collision_point
             if (mic_reached || wall_collision) && show_animated_plot
                 % Use this other plot insted for debug:
@@ -175,56 +176,71 @@ tic
                 % Discard the real source if told so
                 if include_real_source || (amount_of_collisions > 0)
 
-                    % -- Add the new data to the reflectogram --
-
                     % Traveled distance for the delay on time
                     traveled_distance = sum(current_track(1 : current_track_bounces_count, 1));
                     propagation_delay = traveled_distance / propagation_speed;
 
-                    % Attenuation from the spherical law
-                    attenuation_spherical_law = 1 / traveled_distance;
-
-                    % Generate delta on time
-                    fractional_delta = pad_with_zeros( ...
-                                            place_fractional_delta(propagation_delay * sample_rate), ...
-                                            length(reflectogram));
-
-                    % Correct amplitude with spherical law
-                    fractional_delta = fractional_delta * attenuation_spherical_law;
-
-                    % Attenuation (in 1/3 oct bands) from absorption on boundaries
-                    attenuation_boundaries_absorption = prod(current_track(1 : current_track_bounces_count, 2 : size(current_track, 2)), 1);
-
-                    % Apply the corresponding filter to the generated delta
-                    fractional_delta = arbitrary_filter_design(fractional_delta, boundaries_reflection_frequencies, attenuation_boundaries_absorption);
-
-                    % Correct for the air absorption attenuation
-                    [fractional_delta, air_absorption_introduced_delay] = correct_air_absorption(fractional_delta, traveled_distance);
-                    fractional_delta = fractional_delta(air_absorption_introduced_delay : length(reflectogram) + air_absorption_introduced_delay -1);
-
-%                     close all
-%                     subplot(3,1,1)
-%                     plot(fractional_delta)
-%                     grid
-%                     subplot(3,1,2)
-%                     plot(reflectogram)
-%                     grid
-                    % Add the new ray to the reflectogram
-                    reflectogram = reflectogram + (fractional_delta);
-%                     subplot(3,1,3)
-%                     plot(reflectogram)
-%                     grid
-%                     pause
-
-                    % Save new image source position and amplitude
-                    image_sources_count = image_sources_count +1;
+                    % Calculate position of current virtual source
                     image_souce_position = (traveled_distance * [cos(ray_direction + pi) sin(ray_direction + pi)]) + mic_position;
-                    image_sources_list(image_sources_count, :) = [image_souce_position attenuation_spherical_law amount_of_collisions];
+                    image_sources_count = image_sources_count +1;
 
-                    if show_animated_plot
-                        plot(image_souce_position(1), image_souce_position(2), 'x')
-                        plot([image_souce_position(1) mic_position(1)], [image_souce_position(2) mic_position(2)]);
-                        pause
+                    % Checks that the new virtual source is separated
+                    % enough from all other virtual found sources
+                    if (min(sqrt( (image_souce_position(1) - image_sources_list(1 : image_sources_count, 1)).^2 + (image_souce_position(2) - image_sources_list(1 : image_sources_count, 2)).^2    )) > sources_minimum_distance)
+                        % -- Add the new data to the reflectogram --
+
+                        % Attenuation from the spherical law
+                        attenuation_spherical_law = 1 / traveled_distance;
+
+                        % Generate delta on time
+                        fractional_delta = pad_with_zeros( ...
+                                                place_fractional_delta(propagation_delay * sample_rate), ...
+                                                length(reflectogram));
+
+                        % Correct amplitude with spherical law
+                        fractional_delta = fractional_delta * attenuation_spherical_law;
+
+                        % Attenuation (in 1/3 oct bands) from absorption on boundaries
+                        attenuation_boundaries_absorption = prod(current_track(1 : current_track_bounces_count, 2 : size(current_track, 2)), 1);
+
+                        % Apply the corresponding filter to the generated delta
+                        fractional_delta = arbitrary_filter_design(fractional_delta, boundaries_reflection_frequencies, attenuation_boundaries_absorption);
+
+                        % Correct for the air absorption attenuation
+                        [fractional_delta, air_absorption_introduced_delay] = correct_air_absorption(fractional_delta, traveled_distance);
+                        fractional_delta = fractional_delta(air_absorption_introduced_delay : length(reflectogram) + air_absorption_introduced_delay -1);
+
+    %                     close all
+    %                     subplot(3,1,1)
+    %                     plot(fractional_delta)
+    %                     grid
+    %                     subplot(3,1,2)
+    %                     plot(reflectogram)
+    %                     grid
+
+                        if size(reflectogram) ~= size(fractional_delta)
+                            disp('ups ...')
+                        end
+
+
+                        % Add the new ray to the reflectogram
+                        reflectogram = reflectogram + (fractional_delta);
+    %                     subplot(3,1,3)
+    %                     plot(reflectogram)
+    %                     grid
+    %                     pause
+
+                        % Save new image source position and amplitude
+                        image_sources_list(image_sources_count, :) = [image_souce_position attenuation_spherical_law amount_of_collisions];
+
+                        if show_animated_plot
+                            plot(image_souce_position(1), image_souce_position(2), 'x')
+                            plot([image_souce_position(1) mic_position(1)], [image_souce_position(2) mic_position(2)]);
+                            pause
+                        end
+                    else
+                        image_sources_count = image_sources_count -1;
+                        disp('Skipping repeated virtual source ...      ');
                     end
                 end
 

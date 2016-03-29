@@ -33,7 +33,7 @@ function filtered_signal = arbitrary_filter_design(input_signal, bands_frequenci
 
     % Obtain the filter IR using the inverse FFT
     filter_response = filter_module .* (cos(filter_phase) + 1i*sin(filter_phase));
-    filter_ir = real(ifft(filter_response));
+    filter_ir = real(ifft(filter_response))';
     filter_ir = filter_ir(1 : group_delay_samples * 2);    
 
     % Filter input signal with generated IR

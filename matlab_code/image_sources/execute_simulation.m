@@ -5,6 +5,7 @@
 
 % Update simulation parameters
 disp('>> Regenerating simulation parameters ...')
+addpath('rooms/synthetic_room/');
 synthetic_room_geometry(0);
 
 % Perform simulation and obtain results
@@ -25,10 +26,10 @@ sample_rate = loaded_data.sample_rate;
 mic_position = loaded_data.mic_position;
 source_position = loaded_data.source_position;
 room_boundaries = loaded_data.room_boundaries;
-save('simulation_results.mat', 'image_sources_list', 'reflectogram', ...
+save('simulation_results_no_diffusion.mat', 'image_sources_list', 'reflectogram', ...
      'time_axis', 'sample_rate', 'mic_position', 'source_position', ...
      'room_boundaries', 'image_sources_list', 'convolved_ir');
 
 % Displays results
 disp('>> Plotting results.')
-display_results('simulation_results.mat')
+display_results('simulation_results_no_diffusion.mat')

@@ -13,6 +13,7 @@ function plotAmplitudeMap_image_fast(filenames, boundaries, signalFreqs, propaga
         loadedData = load(filenames{i});
         averagedData = averagedData + loadedData.amplitudeMap;
     end
+    averagedData = averagedData / length(filenames);
 
 
     % Power map
@@ -37,37 +38,45 @@ function plotAmplitudeMap_image_fast(filenames, boundaries, signalFreqs, propaga
 %               [boundaries(i, 2) boundaries(i, 4)], ...
 %               'LineWidth', 6, 'Color', [1 1 1]);
 % 
-%         plot([boundaries(i, 1) boundaries(i, 3)], ...
-%               [boundaries(i, 2) boundaries(i, 4)], ...
-%               'LineWidth', 4, 'Color', [1 .2 .3]);
-
-
         plot([boundaries(i, 1) boundaries(i, 3)], ...
               [boundaries(i, 2) boundaries(i, 4)], ...
-              '.', 'LineWidth', 1, 'Color', [1 .2 .3]);
+              'LineWidth', 4, 'Color', [1 .2 .3]);
+
+
+%         plot([boundaries(i, 1) boundaries(i, 3)], ...
+%               [boundaries(i, 2) boundaries(i, 4)], ...
+%               '.', 'LineWidth', 1, 'Color', [1 .2 .3]);
     end
 
     % Rest of the furniture of the plot
     xlabel('X axis [m]', 'FontSize', 14);
     ylabel('Y axis [m]', 'FontSize', 14);
 %     caxis([-40 25])
-%     caxis([-20 10])
+    caxis([-60 0])
 
 %     set(figureHandler, 'Position', [500 100 1200 800])
 
     colorBarHandler = colorbar('eastoutside', 'FontSize', 14);
     colorBarHandler.Label.String = 'Power [dB]';
 
-    title(sprintf('Freq: (%s) [Hz] - Propagation speed: %.1f [m/s] - Max. order: %d', ...
-        num2str(signalFreqs), ...
-        propagationSpeed, ...
-        maxVirtualSourceOrder), ...
-        'FontSize', 14);
+    if length(signalFreqs) > 1
+        title(sprintf('Freq: (%.0f to %.0f) [Hz] - Propagation speed: %.1f [m/s] - Max. order: %d', ...
+            signalFreqs(1), signalFreqs(length(signalFreqs)),...
+            propagationSpeed, ...
+            maxVirtualSourceOrder), ...
+            'FontSize', 14);
+    else
+        title(sprintf('Freq: %.0f [Hz] - Propagation speed: %.1f [m/s] - Max. order: %d', ...
+            signalFreqs, ...
+            propagationSpeed, ...
+            maxVirtualSourceOrder), ...
+            'FontSize', 14);
+    end
 
     % Save plot to file
     set(gcf, 'PaperPosition', [-0.5 -0.35 9.4 8.05]);
     set(gcf, 'PaperSize', [8.5 7.5]);
-    saveas(gcf, sprintf('%s.pdf', filenames), 'pdf');
+    saveas(gcf, sprintf('%s.pdf', filenames{1}), 'pdf');
 
 %     close all
 end

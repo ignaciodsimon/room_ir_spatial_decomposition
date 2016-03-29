@@ -3,19 +3,20 @@ function execute_simulation()
     % Simulation constants
     PROPAGATION_SPEED = 343;
 %     TEST_FREQUENCIES = [107 200 249 333 503 999];
-    TEST_FREQUENCIES = [150 157 163 170];
-    X_LIMITS = [-5 15];
-    Y_LIMITS = [-5 15];
-    GRID_RESOLUTION = 0.025;
-    MAXIMUM_VIRTUAL_SOURCE_ORDER = 2;
+%     TEST_FREQUENCIES = [60 : 10 : 3000];
+    TEST_FREQUENCIES = [500];
+    X_LIMITS = [0 7];
+    Y_LIMITS = [0 8];
+    GRID_RESOLUTION = 0.0125;
+    MAXIMUM_VIRTUAL_SOURCE_ORDER = 10;
 
     % Load list of virtual sources with location, order and amplitude. It
     % also contains the boundaries of the room used when simulating the
     % virtual sources
 %     loaded_data = load('room_simulation_results.mat');
-    loaded_data = load('simulation_results_no_diffusion.mat');
-    
-    
+    loaded_data = load('simulation_results_no_diffusion_order_10.mat');
+
+
     % Filter the sources to a maximum order and make sure there's only one
     % direct ray
     filteredSourceList = [];
@@ -47,7 +48,9 @@ function execute_simulation()
         end
     end
 
-    for currentFrequency = TEST_FREQUENCIES
+    for currentFrequency_index = 1 : length(TEST_FREQUENCIES)
+        currentFrequency = TEST_FREQUENCIES(currentFrequency_index);
+        disp(sprintf(' > Frequency: %d [Hz] (iteration: %d/%d)', TEST_FREQUENCIES(currentFrequency_index), currentFrequency_index, length(TEST_FREQUENCIES)));
         saveFilename = sprintf('power_map_maxorder_%d_freq_%d.mat', MAXIMUM_VIRTUAL_SOURCE_ORDER, currentFrequency);
 
         % Execute simulation
@@ -64,7 +67,12 @@ function execute_simulation()
     end
 
     % Plot results from simulation
-    plotAmplitudeMap_image_fast(saveFilenames, loaded_data.room_boundaries, ...
+    room_boundaries = [0 0 7 0
+                       7 0 7 8
+                       7 8 0 8
+                       0 8 0 0];
+    room_boundaries = [];
+    plotAmplitudeMap_image_fast(saveFilenames, room_boundaries, ...
                                 TEST_FREQUENCIES, PROPAGATION_SPEED, MAXIMUM_VIRTUAL_SOURCE_ORDER);
 
 end

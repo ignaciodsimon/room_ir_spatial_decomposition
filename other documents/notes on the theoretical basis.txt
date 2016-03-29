@@ -1,0 +1,78 @@
+ - Thesis objectives:
+
+	1 - Find out about the boundaries' placement/shape
+	2 - Find characteristics of boundaries' materials
+
+ - Theoretical basis:
+
+ 	1 - An isotropic source placed in free space produces a sound field that can be regarded
+ 		as a set of spherical wavefronts concentric on the source position. This means that
+ 		each point on such field has a sound pressure with:
+ 		    - an amplitude inversely proportional to its distance to the source and
+ 		    - a velocity that is tangent to the radial vector formed by the source and the
+ 		      point in question.
+
+    <[plot of point source radiating in free space]>
+
+ 	2 - When that same source is placed on an enclosure, the sound field changes due to the
+ 	    presence of boundaries that act reflecting part of the propagated energy. This new
+ 	    field can no longer be regarded as a pure spherical wave propagating to the infinite,
+ 	    but as the combined contributions of the point source radiation plus all new waves
+ 	    originated on the boundaries. The result is, in general, an irregular distribution
+ 	    of pressures across the enclosed space.
+
+    <[plot of point source radiating in a room]>
+
+    3 - For any case, the sound field is defined, univocally, by the only two elements that
+    	are involved:
+            - the source characteristics in terms of directivity
+            - the enclosure characteristics:
+                - shape of boundaries
+                - absorption of boundaries (frequency dependent)
+
+        This implies that the medium is considered to be homogenous and isotropic, thus the
+        sound propagation speed does not change in all the enclosure (homogeneous) and does
+        not depend on the displacement direction (isotropic).
+
+    4 - From a pure physical mode, the enclosure can be understood as a series of
+    	infinitesimal particles forming a closed surface. Those, when excited by the source,
+    	vibrate and produce new waves that are in turn propagated inside the enclosure.
+    	These new waves act in the same manner as the one produced by the original source,
+    	and the whole process continues over time until the acoustic energy is dissipated
+    	due to the viscosity of the media (which means that the propagation occurs with a
+    	thermal consumption of energy).
+
+     >> It can be easily thought of as a linear system with feedback. The initial input is
+    	due to the original source wave that excites the system, which responds with new
+    	waves that in turn excite the system again, but with less energy since there exists
+    	attenuation in the propagation.
+
+    5 - The relation that exists between the vibration of an enclosure boundaries and the
+    	sound field produced inside, when the enclosure is free of sources, is given by the
+    	Kirchhoff-Helmholtz integral. It states that the sound pressure is fully determined
+    	within the space contained when it is known across all points in its surface.
+    	
+    	<[Kirchhoff-Helmholtz integral for monochromatic waves]>
+
+		In the case of study, the enclosure is not free of sources, but it is equivalent to
+		say that, the excitation introduced by the original source is instead produced by a
+		combination of all boundaries vibrating in such manner that the same sound field
+		exists. This principle is used in the technique of wave-field-synthesis, and it leads
+		to a new model where the original source is removed and the boundaries are now
+		active elements able to produce waves on its own. Since the sound fields in both
+		situations are the same, they are said to be acoustically equivalent scenarios.
+
+	6 - It is therefore shown that there exists a unique and well defined relationship
+		between the enclosure characteristics and the sound field present inside. It can be
+		concluded that, if the sound field is known, information about the boundaries can
+		be obtained.
+		
+		Accordingly, the problem is formulated as
+			- to define the proper tools that can provide the needed information about the
+			  existing sound field and 
+			- to use that information to find out about the boundaries.
+
+
+ 	>> Note for myself: generate two 2D pressure maps:
+ 	    - one for a point source on free space
+ 	    - another for a point source on a room (place several image sources outside)

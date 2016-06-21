@@ -3,19 +3,20 @@ function execute_simulation()
     % Simulation constants
     PROPAGATION_SPEED = 343;
 %     TEST_FREQUENCIES = [107 200 249 333 503 999];
-%     TEST_FREQUENCIES = [60 : 10 : 3000];
-    TEST_FREQUENCIES = [500];
-    X_LIMITS = [0 7];
-    Y_LIMITS = [0 8];
-    GRID_RESOLUTION = 0.0125;
-    MAXIMUM_VIRTUAL_SOURCE_ORDER = 10;
+    TEST_FREQUENCIES = [200 : 50 : 3000];
+%     TEST_FREQUENCIES = [50 : 7 : 5000];
+    X_LIMITS = [-0.5 6.5];
+    Y_LIMITS = [-0.5 8.5];
+    GRID_RESOLUTION = 0.05 ;%0.0125;
+    MAXIMUM_VIRTUAL_SOURCE_ORDER = 5;
 
     % Load list of virtual sources with location, order and amplitude. It
     % also contains the boundaries of the room used when simulating the
     % virtual sources
 %     loaded_data = load('room_simulation_results.mat');
-    loaded_data = load('simulation_results_no_diffusion_order_10.mat');
-
+%     loaded_data = load('simulation_results_no_diffusion_order_10.mat');
+%     loaded_data = load('simulation_results_no_diffusion_irregular_room_order_10.mat');
+    loaded_data = load('simulation_results_no_diffusion_irregular_room_2_order_10.mat');
 
     % Filter the sources to a maximum order and make sure there's only one
     % direct ray
@@ -60,7 +61,7 @@ function execute_simulation()
                                   inputSignals_amplitudes, currentFrequency, ...
                                   X_LIMITS, Y_LIMITS, GRID_RESOLUTION, saveFilename);
     end
-    
+
     saveFilenames = {};
     for i = 1 : length(TEST_FREQUENCIES)
         saveFilenames{i} = sprintf('power_map_maxorder_%d_freq_%d.mat', MAXIMUM_VIRTUAL_SOURCE_ORDER, TEST_FREQUENCIES(i));

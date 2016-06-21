@@ -39,7 +39,7 @@ function [image_sources_list, reflectogram] = mirror_images(room_definition_file
     addpath('air_absorption/');
 
     % Load data from input file
-    disp(sprintf(' > Loading data from file "%s"', room_definition_filename));
+    disp(sprintf('<> Ray-tracing utility started ... \n    > Loading data from file "%s"', room_definition_filename));
     loaded_data = load(room_definition_filename);
     source_position = loaded_data.source_position;
     mic_position = loaded_data.mic_position;
@@ -65,15 +65,15 @@ function [image_sources_list, reflectogram] = mirror_images(room_definition_file
     angular_range = [scan_angle_min : scan_angle_resolution: scan_angle_max];
 
     % Resulting data matrices
-    image_sources_list = zeros(length(angular_range), 4);
-    image_sources_count = 0;
     reflectogram = zeros(1, ceil(max_radius * max_reflection_order / propagation_speed * sample_rate));
+    image_sources_list = zeros(length(angular_range), 4 + length(reflectogram));
+    image_sources_count = 0;
 
     if show_animated_plot
         figure();
     end
 
-    disp(sprintf(' > Throwing ray on direction: -000.000 [deg] ...'));
+    disp(sprintf('    > Throwing ray on direction: -000.000 [deg] ...'));
 tic
     initial_ray_angle_index = 1;
     while (initial_ray_angle_index <= length(angular_range))
@@ -139,6 +139,8 @@ tic
                                 reflection_direction = test_reflection_direction;
                                 closest_boundary = current_boundary;
 
+                                boundary_index_closest_reflection = current_boundary_index;
+                                
                                 % Used for debug plot:
                                 trazed_ray = test_trazed_ray;
                             end
@@ -151,7 +153,7 @@ tic
 
                     current_track_bounces_count = current_track_bounces_count + 1;
                     current_track(current_track_bounces_count, 1) = sqrt((ray_origin(1) - collision_point(1))^2 + (ray_origin(2) - collision_point(2))^2);
-                    current_track(current_track_bounces_count, 2 : size(current_track, 2)) = boundaries_reflection_coefficients(current_boundary_index, :);
+                    current_track(current_track_bounces_count, 2 : size(current_track, 2)) = boundaries_reflection_coefficients(boundary_index_closest_reflection, :);
                 end
                 
             end
@@ -204,11 +206,11 @@ tic
                         attenuation_boundaries_absorption = prod(current_track(1 : current_track_bounces_count, 2 : size(current_track, 2)), 1);
 
                         % Apply the corresponding filter to the generated delta
-                        fractional_delta = arbitrary_filter_design(fractional_delta, boundaries_reflection_frequencies, attenuation_boundaries_absorption);
+                        [fractional_delta, filter_design_introduced_delay] = arbitrary_filter_design(fractional_delta, boundaries_reflection_frequencies, attenuation_boundaries_absorption);
 
                         % Correct for the air absorption attenuation
                         [fractional_delta, air_absorption_introduced_delay] = correct_air_absorption(fractional_delta, traveled_distance);
-                        fractional_delta = fractional_delta(air_absorption_introduced_delay : length(reflectogram) + air_absorption_introduced_delay -1);
+                        fractional_delta = fractional_delta(air_absorption_introduced_delay + filter_design_introduced_delay : length(reflectogram) + air_absorption_introduced_delay -1);
 
     %                     close all
     %                     subplot(3,1,1)
@@ -224,14 +226,17 @@ tic
 
 
                         % Add the new ray to the reflectogram
-                        reflectogram = reflectogram + (fractional_delta);
+                        reflectogram = reflectogram + pad_with_zeros(fractional_delta, length(reflectogram));
     %                     subplot(3,1,3)
     %                     plot(reflectogram)
     %                     grid
     %                     pause
 
                         % Save new image source position and amplitude
-                        image_sources_list(image_sources_count, :) = [image_souce_position attenuation_spherical_law amount_of_collisions];
+                        image_sources_list(image_sources_count, 1 : 4) = [image_souce_position attenuation_spherical_law amount_of_collisions];
+
+                        % Save the IR associated to the new virtual source
+                        image_sources_list(image_sources_count, 5 : size(image_sources_list, 2)) = pad_with_zeros(arbitrary_filter_design([1 zeros(1, length(fractional_delta)-1)], boundaries_reflection_frequencies, attenuation_boundaries_absorption), length(reflectogram));
 
                         if show_animated_plot
                             plot(image_souce_position(1), image_souce_position(2), 'x')
@@ -240,7 +245,7 @@ tic
                         end
                     else
                         image_sources_count = image_sources_count -1;
-                        disp('Skipping repeated virtual source ...      ');
+%                         disp('Skipping repeated virtual source ...      ');
                     end
                 end
 
